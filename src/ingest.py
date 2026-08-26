@@ -25,9 +25,11 @@ def ingest_data(**context):
         log.info("Aucun nouveau fichier.")
         context["ti"].xcom_push(key="files", value=[])
         context["ti"].xcom_push(key="raw_path", value="")
+        context["ti"].xcom_push(key="rows_read_by_file", value={})
         return 0
 
     frames = []
+    lues_par_fichier = {}
     for chemin in nouveaux:
         nom = os.path.basename(chemin)
         df = pd.read_csv(chemin, encoding="utf-8", dtype=str)
@@ -36,6 +38,7 @@ def ingest_data(**context):
             raise ValueError(nom + " : colonnes manquantes " + str(manquantes))
         df["source_file"] = nom
         frames.append(df)
+        lues_par_fichier[nom] = len(df)
         log.info("  %s : %d lignes lues", nom, len(df))
 
     brut = pd.concat(frames, ignore_index=True)
@@ -47,4 +50,5 @@ def ingest_data(**context):
     context["ti"].xcom_push(key="files", value=[os.path.basename(f) for f in nouveaux])
     context["ti"].xcom_push(key="raw_path", value=chemin_raw)
     context["ti"].xcom_push(key="rows_read", value=len(brut))
+    context["ti"].xcom_push(key="rows_read_by_file", value=lues_par_fichier)
     return len(brut)

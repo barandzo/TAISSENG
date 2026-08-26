@@ -51,8 +51,8 @@ def load_warehouse(**context):
     ti = context["ti"]
     chemin_final = ti.xcom_pull(task_ids="transform_data", key="final_path")
     fichiers = ti.xcom_pull(task_ids="ingest_data", key="files") or []
-    rows_read = ti.xcom_pull(task_ids="ingest_data", key="rows_read") or 0
-    rows_rejected = ti.xcom_pull(task_ids="validate_data", key="rows_rejected") or 0
+    lues = ti.xcom_pull(task_ids="ingest_data", key="rows_read_by_file") or {}
+    rejetees = ti.xcom_pull(task_ids="validate_data", key="rejected_by_file") or {}
 
     if not chemin_final:
         log.info("Rien a charger.")
@@ -80,6 +80,14 @@ def load_warehouse(**context):
         """)
         inseres = cur.rowcount
 
+        # Compte reel par fichier, lu depuis la table de faits elle-meme
+        cur.execute(
+            "SELECT source_file, COUNT(*) FROM fact_sales "
+            "WHERE source_file = ANY(%s) GROUP BY source_file",
+            (fichiers,),
+        )
+        charges = dict(cur.fetchall())
+
         for nom in fichiers:
             cur.execute(
                 "INSERT INTO etl_file_log "
@@ -89,7 +97,7 @@ def load_warehouse(**context):
                 "rows_read = EXCLUDED.rows_read, rows_loaded = EXCLUDED.rows_loaded, "
                 "rows_rejected = EXCLUDED.rows_rejected, status = 'SUCCESS', "
                 "processed_at = NOW()",
-                (nom, rows_read, inseres, rows_rejected),
+                (nom, lues.get(nom, 0), charges.get(nom, 0), rejetees.get(nom, 0)),
             )
 
         conn.commit()

@@ -2,6 +2,7 @@
 import os
 import json
 import logging
+from collections import Counter
 from datetime import datetime
 
 import pandas as pd
@@ -54,6 +55,7 @@ def validate_data(**context):
 
     if not chemin_raw:
         ti.xcom_push(key="clean_path", value="")
+        ti.xcom_push(key="rejected_by_file", value={})
         return 0
 
     df = pd.read_csv(chemin_raw, encoding="utf-8", dtype=str)
@@ -106,7 +108,8 @@ def validate_data(**context):
         df.loc[inconnu, "customer_id"] = "UNKNOWN"
         log.info("  R7 clients rattaches a UNKNOWN   : %d", int(inconnu.sum()))
 
-    nb_rejets = _ecrire_rejets(panier_rejets)
+    rejets_par_fichier = _ecrire_rejets(panier_rejets)
+    nb_rejets = sum(rejets_par_fichier.values())
 
     chemin_clean = os.path.join(STAGING_DIR, "clean_" + ts + ".csv")
     df.to_csv(chemin_clean, index=False, encoding="utf-8")
@@ -116,18 +119,22 @@ def validate_data(**context):
 
     ti.xcom_push(key="clean_path", value=chemin_clean)
     ti.xcom_push(key="rows_rejected", value=nb_rejets)
+    ti.xcom_push(key="rejected_by_file", value=rejets_par_fichier)
     return len(df)
 
 
 def _ecrire_rejets(panier):
+    """Ecrit les rejets en base et retourne le compte par fichier source."""
     if not panier:
-        return 0
+        return {}
 
     cols = RAW_COLUMNS + ["source_file"]
     lignes = []
+    compteur = Counter()
     for bloc, raison in panier:
         brut = bloc[cols].where(pd.notna(bloc[cols]), None)
         for enreg in brut.to_dict(orient="records"):
+            compteur[enreg.get("source_file")] += 1
             lignes.append((
                 enreg.get("transaction_id"),
                 enreg.get("source_file"),
@@ -145,4 +152,4 @@ def _ecrire_rejets(panier):
         conn.commit()
 
     log.info("%d ligne(s) ecrite(s) dans rejected_transactions", len(lignes))
-    return len(lignes)
+    return dict(compteur)
