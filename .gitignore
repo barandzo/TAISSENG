@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 .env
 data/rejects/
+data/transactions/sales_2026_08_06.csv
