@@ -1,0 +1,6 @@
+logs/
+plugins/
+__pycache__/
+*.pyc
+.env
+data/rejects/

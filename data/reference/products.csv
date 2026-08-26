@@ -1,0 +1,31 @@
+product_id,product_name,category,unit_price
+P001,Laptop HP 15,Informatique,450000
+P002,Laptop Lenovo ThinkPad,Informatique,520000
+P003,Souris Logitech,Accessoires,15000
+P004,Clavier Dell,Accessoires,25000
+P005,Écran 24 pouces,Informatique,120000
+P006,Galaxy A55,Smartphone,280000
+P007,Tecno Camon 30,Smartphone,165000
+P008,Pixel 8a,Smartphone,390000
+P009,Casque Bluetooth,Audio,45000
+P010,Écouteurs filaires,Audio,8000
+P011,Disque SSD 1 To,Stockage,75000
+P012,Clé USB 64 Go,Stockage,12000
+P013,Routeur Wi-Fi,Réseau,35000
+P014,Câble HDMI,Accessoires,7000
+P015,Webcam HD,Accessoires,30000
+P016,Imprimante Canon,Bureautique,95000
+P017,Onduleur 1000VA,Énergie,85000
+P018,Power Bank 20000mAh,Énergie,25000
+P019,Smartwatch,Wearable,55000
+P020,Tablette Android,Tablette,180000
+P021,Adaptateur USB-C,Accessoires,10000
+P022,Sacoche ordinateur,Accessoires,18000
+P023,Support laptop,Accessoires,22000
+P024,Microphone USB,Audio,40000
+P025,Mini projecteur,Bureautique,210000
+P026,Switch réseau 8 ports,Réseau,30000
+P027,Carte mémoire 128 Go,Stockage,18000
+P028,Chargeur USB-C 65W,Énergie,28000
+P029,Hub USB-C,Accessoires,32000
+P030,Enceinte Bluetooth,Audio,50000
