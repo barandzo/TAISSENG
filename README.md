@@ -251,6 +251,31 @@ magasin ou un jour précis — c'est la raison d'être de `etl_file_log`.
 Ces vues évitent de réécrire les quatre jointures dans chaque requête et
 servent de socle à l'API comme à un futur dashboard.
 
+## Tests automatisés
+
+36 tests unitaires couvrent les règles de qualité, exécutés à chaque push
+via GitHub Actions.
+
+```bash
+docker exec -it taiss_airflow_scheduler bash -c "cd /opt/airflow && python -m pytest -q"
+```
+
+Le module `src/quality.py` est organisé en trois couches : règles pures,
+orchestration pure, effets de bord. Cette séparation permet de tester la
+logique métier sans PostgreSQL ni Airflow — les tests s'exécutent en moins
+de deux secondes sur une machine vierge.
+
+C'est nécessaire parce qu'en data engineering, une règle erronée ne fait pas
+planter le pipeline : il reste vert et charge des données fausses. Les tests
+sont le seul garde-fou.
+
+Deux problèmes ont été détectés par les tests et non par les exécutions
+manuelles :
+
+- un plantage lorsque toutes les lignes d'un fichier sont rejetées ;
+- un couplage entre le module de règles et le pilote PostgreSQL.
+
+
 ## Structure du projet
 
 ```
