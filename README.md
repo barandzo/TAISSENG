@@ -118,23 +118,16 @@ cp .env.example .env          # puis renseigner les valeurs
 docker compose up -d --build
 ```
 
-Initialiser le schéma (une seule fois) :
+Initialiser le Data Warehouse (une seule fois, script idempotent) :
 
 ```bash
-docker cp sql/01_schema.sql taiss_postgres:/tmp/01_schema.sql
-docker exec -it taiss_postgres psql -U taiss -d warehouse -f /tmp/01_schema.sql
-
-docker cp sql/02_staging.sql taiss_postgres:/tmp/02_staging.sql
-docker exec -it taiss_postgres psql -U taiss -d warehouse -f /tmp/02_staging.sql
-
-docker cp sql/03_views.sql taiss_postgres:/tmp/03_views.sql
-docker exec -it taiss_postgres psql -U taiss -d warehouse -f /tmp/03_views.sql
+bash setup.sh                 # Linux / macOS
+.\setup.ps1                   # Windows
 ```
 
 Lancer le pipeline :
 
 ```bash
-docker exec -it taiss_airflow_scheduler airflow dags unpause retail_sales_pipeline
 docker exec -it taiss_airflow_scheduler airflow dags trigger retail_sales_pipeline
 ```
 
