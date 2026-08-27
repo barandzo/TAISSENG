@@ -1,10 +1,15 @@
-"""Etape 3 - Transformation et calcul des mesures."""
+"""Etape 3 - Transformation et calcul des mesures.
+
+Utilise les fonctions pures de quality.py pour le calcul du montant et
+de la cle de date : la logique est ainsi couverte par les tests.
+"""
 import os
 import logging
 
 import pandas as pd
 
 from src.config import STAGING_DIR
+from src.quality import calculer_montant, to_date_key
 
 log = logging.getLogger(__name__)
 
@@ -29,8 +34,11 @@ def transform_data(**context):
 
     df["quantity"] = df["quantity_num"].astype(int)
     df["unit_price"] = df["unit_price_num"].astype(float).round(2)
-    df["total_amount"] = (df["quantity"] * df["unit_price"]).round(2)
-    df["date_key"] = df["transaction_ts"].dt.strftime("%Y%m%d").astype(int)
+
+    df["total_amount"] = df.apply(
+        lambda r: calculer_montant(r["quantity"], r["unit_price"]), axis=1
+    )
+    df["date_key"] = df["transaction_ts"].apply(to_date_key)
 
     final = df[COLONNES_FINALES]
     chemin_final = os.path.join(STAGING_DIR, "final_" + ts + ".csv")
