@@ -1,5 +1,7 @@
 # TAISS_PROJECT — Retail Data Pipeline
 
+[![Tests](https://github.com/barandzo/TAISSENG/actions/workflows/tests.yml/badge.svg)](https://github.com/barandzo/TAISSENG/actions/workflows/tests.yml)
+
 Mini-plateforme Data Engineering : ingestion de fichiers de transactions
 multi-magasins, contrôle qualité, chargement dans un Data Warehouse
 dimensionnel PostgreSQL et exposition d'indicateurs via une API REST.
