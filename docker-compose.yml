@@ -92,5 +92,22 @@ services:
         condition: service_healthy
     restart: always
 
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: taiss_prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./docker/prometheus/alerts.yml:/etc/prometheus/alerts.yml
+      - promdata:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+    restart: always
+
 volumes:
   pgdata:
+  promdata:

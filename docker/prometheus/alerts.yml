@@ -1,0 +1,55 @@
+# Regles d alerte - plateforme TAISS
+#
+# Les seuils sont volontairement bas pour la demonstration. En production
+# ils seraient calibres sur l historique observe.
+
+groups:
+  - name: qualite_donnees
+    rules:
+
+      # Un taux de rejet eleve signale un probleme en amont : caisse
+      # defectueuse, export corrompu, changement de format non annonce.
+      - alert: TauxDeRejetEleve
+        expr: taiss_acceptance_rate_percent < 95
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          resume: "Taux d acceptation sous 95%"
+          detail: "Acceptation a {{ $value }}%. Verifier les fichiers sources."
+
+      # Une source qui concentre les rejets designe le magasin a contacter.
+      - alert: MagasinAvecRejetsAnormaux
+        expr: taiss_rejects_by_source_file > 15
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          resume: "Rejets anormaux sur {{ $labels.source_file }}"
+          detail: "{{ $value }} rejets sur ce fichier."
+
+  - name: fraicheur
+    rules:
+
+      # Le pipeline tourne quotidiennement : au-dela de 26 h sans
+      # chargement, une execution a ete manquee.
+      - alert: DonneesObsoletes
+        expr: taiss_data_freshness_hours > 26
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          resume: "Aucun chargement depuis plus de 26 heures"
+          detail: "Dernier chargement il y a {{ $value }} heures."
+
+  - name: disponibilite
+    rules:
+
+      - alert: ApiIndisponible
+        expr: up{job="taiss-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          resume: "L API ne repond plus"
+          detail: "Prometheus ne parvient pas a collecter depuis 2 minutes."

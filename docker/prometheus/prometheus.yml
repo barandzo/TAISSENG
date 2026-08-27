@@ -1,0 +1,16 @@
+# Configuration Prometheus - plateforme TAISS
+
+global:
+  scrape_interval: 15s        # frequence de collecte
+  evaluation_interval: 15s    # frequence d evaluation des regles d alerte
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  - job_name: taiss-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["api:8000"]
+        labels:
+          service: retail-api

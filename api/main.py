@@ -7,7 +7,9 @@ deja pre-calculees dans fact_sales, l API se contente d agreger.
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Query
+from prometheus_fastapi_instrumentator import Instrumentator
 
+import metrics
 from db import query, query_one
 
 app = FastAPI(
@@ -15,6 +17,23 @@ app = FastAPI(
     description="Indicateurs de ventes issus du Data Warehouse",
     version="1.0.0",
 )
+
+# Expose /metrics : metriques techniques automatiques (latence, requetes)
+# plus les metriques metier definies dans metrics.py
+_instrumentator = Instrumentator().instrument(app)
+
+
+@app.on_event("startup")
+def _demarrer_metriques():
+    _instrumentator.expose(app, endpoint="/metrics", include_in_schema=False)
+
+
+@app.middleware("http")
+async def _rafraichir_avant_collecte(request, call_next):
+    """Met a jour les jauges metier juste avant que Prometheus ne lise."""
+    if request.url.path == "/metrics":
+        metrics.rafraichir()
+    return await call_next(request)
 
 
 @app.get("/health", tags=["technique"])

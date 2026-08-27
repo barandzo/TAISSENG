@@ -339,3 +339,33 @@ Le schéma SQL doit alors être réappliqué (voir section Démarrage).
 | `airflow dags list` → `No data found` | Fichier absent de `dags/` ou erreur d'import | `airflow dags list-import-errors` |
 | Modifications de `src/` non prises en compte | Modules Python en cache | `docker compose restart airflow-scheduler` |
 | Webserver en boucle de redémarrage | Échec de `airflow-init` | `docker compose logs airflow-init` |
+
+## Monitoring
+
+Prometheus collecte les métriques de l'API toutes les 15 secondes.
+
+| Interface | URL |
+|---|---|
+| Prometheus | http://localhost:9090 |
+| Cibles collectées | http://localhost:9090/targets |
+| Règles d'alerte | http://localhost:9090/alerts |
+| Métriques brutes | http://localhost:8000/metrics |
+
+Métriques exposées, au-delà des métriques techniques automatiques :
+
+| Métrique | Signification |
+|---|---|
+| `taiss_rows_loaded_total` | Transactions chargées dans le warehouse |
+| `taiss_rows_rejected_total` | Transactions rejetées et tracées |
+| `taiss_acceptance_rate_percent` | Taux d'acceptation global |
+| `taiss_rejects_by_reason` | Rejets ventilés par motif |
+| `taiss_rejects_by_source_file` | Rejets ventilés par fichier source |
+| `taiss_data_freshness_hours` | Heures depuis le dernier chargement |
+| `taiss_revenue_by_store` | Chiffre d'affaires par point de vente |
+
+Quatre règles d'alerte sont définies : taux d'acceptation sous 95 %, rejets
+anormaux sur un fichier source, données non rafraîchies depuis plus de
+26 heures, API injoignable.
+
+La métrique déterminante n'est pas le CPU mais le taux de rejet par source :
+un pipeline peut être techniquement vert et charger des données fausses.
