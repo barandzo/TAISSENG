@@ -22,7 +22,11 @@ from typing import Optional
 import pandas as pd
 
 from src.config import REF_DIR, STAGING_DIR, RAW_COLUMNS
-from src.db import get_conn
+
+# NOTE : src.db n est volontairement PAS importe ici.
+# Il tire psycopg2, qui n est necessaire qu a l ecriture des rejets.
+# L import est fait dans _ecrire_rejets pour que la couche de regles
+# pures reste testable sans pilote PostgreSQL installe.
 
 log = logging.getLogger(__name__)
 
@@ -320,6 +324,7 @@ def validate_data(**context):
 
 def _ecrire_rejets(rejets) -> dict:
     """Persiste les rejets et retourne leur compte par fichier source."""
+    from src.db import get_conn
     if not rejets:
         return {}
 
