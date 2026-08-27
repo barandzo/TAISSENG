@@ -369,3 +369,14 @@ anormaux sur un fichier source, données non rafraîchies depuis plus de
 
 La métrique déterminante n'est pas le CPU mais le taux de rejet par source :
 un pipeline peut être techniquement vert et charger des données fausses.
+
+| Grafana | http://localhost:3000 | `admin` / `admin` |
+
+Le dashboard « TAISS - Retail Data Pipeline » est provisionné automatiquement
+au démarrage (datasource et panneaux définis en fichiers, versionnés dans
+`docker/grafana/`). Aucune configuration manuelle n'est nécessaire, et le
+tableau de bord est reproductible sur toute machine.
+
+Il présente trois zones : qualité des données (taux d'acceptation, rejets par
+motif et par fichier source), état du pipeline (fraîcheur, fichiers traités)
+et activité métier (chiffre d'affaires global et par point de vente).
